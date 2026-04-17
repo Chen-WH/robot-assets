@@ -45,25 +45,25 @@
     <material name="gray" rgba="0.4627 0.4627 0.4627 1"/>
     <material name="black" rgba="0.149 0.149 0.149 1"/>
 
-    <mesh name="link0" file="./assets/base_link.STL"/>
-    <mesh name="link1" file="./assets/1.STL"/>
-    <mesh name="link2" file="./assets/2.STL"/>
-    <mesh name="link3" file="./assets/3.STL"/>
-    <mesh name="link4" file="./assets/4.STL"/>
-    <mesh name="link5" file="./assets/5.STL"/>
-    <mesh name="link6" file="./assets/6.STL"/>
+    <mesh name="link0" file="../assets/base_link.STL"/>
+    <mesh name="link1" file="../assets/1.STL"/>
+    <mesh name="link2" file="../assets/2.STL"/>
+    <mesh name="link3" file="../assets/3.STL"/>
+    <mesh name="link4" file="../assets/4.STL"/>
+    <mesh name="link5" file="../assets/5.STL"/>
+    <mesh name="link6" file="../assets/6.STL"/>
 
-    <mesh name="mount_Link" file="../kinect_dk/assets/mount_v2.STL"/>
-    <mesh name="camera_Link" file="../kinect_dk/assets/Azure Kinect DK.STL"/>
+    <mesh name="mount_Link" file="../../kinect_dk/assets/mount_v2.STL"/>
+    <mesh name="camera_Link" file="../../kinect_dk/assets/Azure Kinect DK.STL"/>
 
-    <mesh class="2f85" file="../robotiq_2f85/assets/base_mount.stl"/>
-    <mesh class="2f85" file="../robotiq_2f85/assets/base.stl"/>
-    <mesh class="2f85" file="../robotiq_2f85/assets/driver.stl"/>
-    <mesh class="2f85" file="../robotiq_2f85/assets/coupler.stl"/>
-    <mesh class="2f85" file="../robotiq_2f85/assets/follower.stl"/>
-    <mesh class="2f85" file="../robotiq_2f85/assets/pad.stl"/>
-    <mesh class="2f85" file="../robotiq_2f85/assets/silicone_pad.stl"/>
-    <mesh class="2f85" file="../robotiq_2f85/assets/spring_link.stl"/>
+    <mesh class="2f85" file="../../robotiq_2f85/assets/base_mount.stl"/>
+    <mesh class="2f85" file="../../robotiq_2f85/assets/base.stl"/>
+    <mesh class="2f85" file="../../robotiq_2f85/assets/driver.stl"/>
+    <mesh class="2f85" file="../../robotiq_2f85/assets/coupler.stl"/>
+    <mesh class="2f85" file="../../robotiq_2f85/assets/follower.stl"/>
+    <mesh class="2f85" file="../../robotiq_2f85/assets/pad.stl"/>
+    <mesh class="2f85" file="../../robotiq_2f85/assets/silicone_pad.stl"/>
+    <mesh class="2f85" file="../../robotiq_2f85/assets/spring_link.stl"/>
   </asset>
 
   <worldbody>

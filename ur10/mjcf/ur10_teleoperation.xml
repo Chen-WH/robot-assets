@@ -2,12 +2,12 @@
   <asset>
     <!-- include basic cube textures/materials -->
     <texture name="cube" type="cube"
-             fileup="../reorientation_cube/textures/fileup.png"
-             fileback="../reorientation_cube/textures/fileback.png"
-             filedown="../reorientation_cube/textures/filedown.png"
-             filefront="../reorientation_cube/textures/filefront.png"
-             fileleft="../reorientation_cube/textures/fileleft.png"
-             fileright="../reorientation_cube/textures/fileright.png"/>
+             fileup="../../reorientation_cube/textures/fileup.png"
+             fileback="../../reorientation_cube/textures/fileback.png"
+             filedown="../../reorientation_cube/textures/filedown.png"
+             filefront="../../reorientation_cube/textures/filefront.png"
+             fileleft="../../reorientation_cube/textures/fileleft.png"
+             fileright="../../reorientation_cube/textures/fileright.png"/>
     <material name="cube" texture="cube"/>
     <material name="red" rgba="1 0 0 1"/>
     <material name="green" rgba="0 1 0 1"/>
@@ -22,7 +22,7 @@
   <option timestep="0.0025" gravity="0 0 0"/>
 
   <!-- include UR10 model (relative path) -->
-  <include file="../ur10/ur10_manip.xml"/>
+  <include file="ur10_manipulation.xml"/>
 
   <worldbody>
     <!-- directional light and ground plane (from ur10 scene) -->
