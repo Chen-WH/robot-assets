@@ -99,7 +99,6 @@
       </body>
       <body name="r_f_link3_1" pos="0.006966 0.010612 0.1734" quat="0.707105 0 -0.707108 0">
         <inertial pos="0.00700207 9.45418e-08 0.000968552" quat="0.602139 0.37074 0.370772 0.602087" mass="0.00409704" diaginertia="3.18126e-07 2.71726e-07 2.04209e-07"/>
-        <joint name="r_f_joint3_1" pos="0 0 0" axis="0 0 1" range="-0.001 0.001"/>
         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.79216 0.81961 0.93333 1" mesh="r_f_link3_1"/>
         <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="r_f_link3_1" contype="0" conaffinity="0" group="1" density="0"/>
         <body name="r_f_link3_2" pos="0.017 0 0" quat="0.707105 -0.707108 0 0">
@@ -208,7 +207,6 @@
     <position name="act_r_f_joint5_4" joint="r_f_joint5_4" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20"/>
     <position name="act_r_f_joint1_1" joint="r_f_joint1_1" kp="20" kv="1" ctrlrange="0 2.2" forcerange="-20 20"/>
     <position name="act_r_f_joint2_1" joint="r_f_joint2_1" kp="20" kv="1" ctrlrange="0 0.3" forcerange="-20 20"/>
-    <position name="act_r_f_joint3_1" joint="r_f_joint3_1" kp="20" kv="1" ctrlrange="-0.0001 0.0001" forcerange="-20 20"/>
     <position name="act_r_f_joint4_1" joint="r_f_joint4_1" kp="20" kv="1" ctrlrange="0 0.3" forcerange="-20 20"/>
     <position name="act_r_f_joint5_1" joint="r_f_joint5_1" kp="20" kv="1" ctrlrange="0 0.6" forcerange="-20 20"/>
   </actuator>
