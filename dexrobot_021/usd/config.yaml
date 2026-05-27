@@ -1,9 +1,7 @@
-asset_root: /home/chenwh/ros2_ws/src/robot-assets/dexrobot_021
-usd_dir: /home/chenwh/ros2_ws/src/robot-assets/dexrobot_021/usd
+asset_root: ..
+usd_dir: .
 source_format: urdf
 converter: IsaacLab UrdfConverter
-isaaclab_path: /home/chenwh/Git/my_isaaclab
-conda_env: my_isaaclab_500
 
 assets:
   - name: dexhand021_left_collision_convex
@@ -49,3 +47,4 @@ conversion:
 notes:
   - Fixed joints are intentionally not merged so the five pad links remain separate rigid bodies.
   - The mimic model is kept only for MJCF and is not exported as USD.
+  - Run ../tools/patch_link_geometry_refs.py after URDF conversion when Isaac Sim places geometry under sibling configuration prims.
