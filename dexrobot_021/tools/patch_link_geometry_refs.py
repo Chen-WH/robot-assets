@@ -19,7 +19,7 @@ from pathlib import Path
 from isaaclab.app import AppLauncher
 
 DEXROBOT021_DIR = Path(__file__).resolve().parents[1]
-DEFAULT_USD = DEXROBOT021_DIR / "usd" / "dexhand021_left_collision_convex.usd"
+DEFAULT_USD = DEXROBOT021_DIR / "usd" / "dexhand021_left_convex_collision.usd"
 
 
 def _count_collision_prims(stage) -> int:
@@ -31,6 +31,7 @@ def _count_collision_prims(stage) -> int:
 def _patch_usd(root_usd: Path) -> tuple[int, int]:
     from pxr import Usd
 
+    root_usd = root_usd.expanduser().resolve()
     stage = Usd.Stage.Open(str(root_usd))
     if stage is None:
         raise RuntimeError(f"Failed to open USD: {root_usd}")
@@ -45,6 +46,8 @@ def _patch_usd(root_usd: Path) -> tuple[int, int]:
     for ref_path in (base_ref, physics_ref):
         if not ref_path.exists():
             raise FileNotFoundError(ref_path)
+    base_asset = base_ref.relative_to(root_usd.parent).as_posix()
+    physics_asset = physics_ref.relative_to(root_usd.parent).as_posix()
 
     root_path = default_prim.GetPath()
     link_names = [
@@ -60,13 +63,13 @@ def _patch_usd(root_usd: Path) -> tuple[int, int]:
         visual.SetInstanceable(False)
         visual_refs = visual.GetReferences()
         visual_refs.ClearReferences()
-        visual_refs.AddReference(str(base_ref), f"/visuals/{link_name}")
+        visual_refs.AddReference(base_asset, f"/visuals/{link_name}")
 
         collision = stage.DefinePrim(f"{root_path}/{link_name}/collisions", "Xform")
         collision.SetInstanceable(False)
         collision_refs = collision.GetReferences()
         collision_refs.ClearReferences()
-        collision_refs.AddReference(str(physics_ref), f"/colliders/{link_name}")
+        collision_refs.AddReference(physics_asset, f"/colliders/{link_name}")
 
     stage.GetRootLayer().Save()
 
@@ -78,19 +81,26 @@ def _patch_usd(root_usd: Path) -> tuple[int, int]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--usd", type=Path, default=DEFAULT_USD, help="Root USD to patch.")
+    parser.add_argument(
+        "--usd",
+        type=Path,
+        nargs="+",
+        default=[DEFAULT_USD],
+        help="Root USD file(s) to patch.",
+    )
     AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args()
 
     launcher = AppLauncher(args)
     simulation_app = launcher.app
     try:
-        link_count, collision_count = _patch_usd(args.usd)
-        print(f"usd: {args.usd}", flush=True)
-        print(f"patched_link_count: {link_count}", flush=True)
-        print(f"collision_count_after_patch: {collision_count}", flush=True)
-        if collision_count == 0:
-            raise SystemExit("Patch completed but no CollisionAPI prims are visible.")
+        for usd in args.usd:
+            link_count, collision_count = _patch_usd(usd)
+            print(f"usd: {usd}", flush=True)
+            print(f"patched_link_count: {link_count}", flush=True)
+            print(f"collision_count_after_patch: {collision_count}", flush=True)
+            if collision_count == 0:
+                raise SystemExit(f"Patch completed but no CollisionAPI prims are visible: {usd}")
     finally:
         simulation_app.close()
 
