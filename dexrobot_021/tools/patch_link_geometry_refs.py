@@ -7,19 +7,24 @@ composed into the spawned robot.
 
 This asset-local conversion utility adds explicit link-local references from
 each link's ``visuals`` and ``collisions`` prim to the corresponding
-configuration-layer prim, then marks those local reference prims as
-non-instanceable.
+configuration-layer prim. Visual references are left instanceable to keep cloned
+IsaacLab scenes compact. Collision references stay non-instanceable so PhysX
+sees direct ``CollisionAPI`` prims instead of collision APIs hidden behind USD
+instance proxies. URDF ``mimic`` tags are also re-authored as
+``PhysxMimicJointAPI:rotZ`` constraints on the follower joints.
 """
 
 from __future__ import annotations
 
 import argparse
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from isaaclab.app import AppLauncher
 
 DEXROBOT021_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_USD = DEXROBOT021_DIR / "usd" / "dexhand021_left_convex_collision.usd"
+URDF_DIR = DEXROBOT021_DIR / "urdf"
 
 
 def _count_collision_prims(stage) -> int:
@@ -28,7 +33,59 @@ def _count_collision_prims(stage) -> int:
     return sum(1 for prim in stage.Traverse() if prim.HasAPI(UsdPhysics.CollisionAPI))
 
 
-def _patch_usd(root_usd: Path) -> tuple[int, int]:
+def _read_urdf_mimics(urdf_path: Path) -> list[tuple[str, str, float, float]]:
+    if not urdf_path.exists():
+        return []
+
+    root = ET.parse(urdf_path).getroot()
+    mimics = []
+    for joint in root.findall("joint"):
+        mimic = joint.find("mimic")
+        if mimic is None:
+            continue
+        follower = joint.attrib["name"]
+        driver = mimic.attrib["joint"]
+        multiplier = float(mimic.attrib.get("multiplier", "1.0"))
+        offset = float(mimic.attrib.get("offset", "0.0"))
+        mimics.append((follower, driver, multiplier, offset))
+    return mimics
+
+
+def _apply_api_schema(prim, schema_name: str) -> None:
+    from pxr import Sdf
+
+    schemas = [str(schema) for schema in prim.GetAppliedSchemas()]
+    if schema_name not in schemas:
+        schemas.insert(0, schema_name)
+    prim.SetMetadata("apiSchemas", Sdf.TokenListOp.Create(prependedItems=schemas))
+
+
+def _patch_physx_mimics(stage, root_path, root_usd: Path) -> int:
+    from pxr import Sdf
+
+    urdf_path = URDF_DIR / f"{root_usd.stem}.urdf"
+    mimic_specs = _read_urdf_mimics(urdf_path)
+    for follower, driver, multiplier, offset in mimic_specs:
+        joint = stage.GetPrimAtPath(f"{root_path}/joints/{follower}")
+        if not joint.IsValid():
+            raise RuntimeError(f"Missing mimic follower joint prim: {root_path}/joints/{follower}")
+        driver_path = Sdf.Path(f"{root_path}/joints/{driver}")
+        if not stage.GetPrimAtPath(driver_path).IsValid():
+            raise RuntimeError(f"Missing mimic reference joint prim: {driver_path}")
+
+        _apply_api_schema(joint, "PhysxMimicJointAPI:rotZ")
+        joint.CreateRelationship("physxMimicJoint:rotZ:referenceJoint").SetTargets([driver_path])
+        joint.CreateAttribute("physxMimicJoint:rotZ:referenceJointAxis", Sdf.ValueTypeNames.Token).Set("rotZ")
+        joint.CreateAttribute("physxMimicJoint:rotZ:gearing", Sdf.ValueTypeNames.Float).Set(-multiplier)
+        joint.CreateAttribute("physxMimicJoint:rotZ:offset", Sdf.ValueTypeNames.Float).Set(-offset)
+        joint.CreateAttribute("physxMimicJoint:rotZ:naturalFrequency", Sdf.ValueTypeNames.Float).Set(100.0)
+        joint.CreateAttribute("physxMimicJoint:rotZ:dampingRatio", Sdf.ValueTypeNames.Float).Set(1.0)
+        joint.CreateAttribute("drive:angular:physics:stiffness", Sdf.ValueTypeNames.Float).Set(0.0)
+        joint.CreateAttribute("drive:angular:physics:damping", Sdf.ValueTypeNames.Float).Set(0.0)
+    return len(mimic_specs)
+
+
+def _patch_usd(root_usd: Path) -> tuple[int, int, int]:
     from pxr import Usd
 
     root_usd = root_usd.expanduser().resolve()
@@ -60,7 +117,7 @@ def _patch_usd(root_usd: Path) -> tuple[int, int]:
 
     for link_name in link_names:
         visual = stage.DefinePrim(f"{root_path}/{link_name}/visuals", "Xform")
-        visual.SetInstanceable(False)
+        visual.SetInstanceable(True)
         visual_refs = visual.GetReferences()
         visual_refs.ClearReferences()
         visual_refs.AddReference(base_asset, f"/visuals/{link_name}")
@@ -71,12 +128,14 @@ def _patch_usd(root_usd: Path) -> tuple[int, int]:
         collision_refs.ClearReferences()
         collision_refs.AddReference(physics_asset, f"/colliders/{link_name}")
 
+    mimic_count = _patch_physx_mimics(stage, root_path, root_usd)
+
     stage.GetRootLayer().Save()
 
     patched_stage = Usd.Stage.Open(str(root_usd))
     if patched_stage is None:
         raise RuntimeError(f"Failed to reopen patched USD: {root_usd}")
-    return len(link_names), _count_collision_prims(patched_stage)
+    return len(link_names), _count_collision_prims(patched_stage), mimic_count
 
 
 def main() -> None:
@@ -95,10 +154,11 @@ def main() -> None:
     simulation_app = launcher.app
     try:
         for usd in args.usd:
-            link_count, collision_count = _patch_usd(usd)
+            link_count, collision_count, mimic_count = _patch_usd(usd)
             print(f"usd: {usd}", flush=True)
             print(f"patched_link_count: {link_count}", flush=True)
             print(f"collision_count_after_patch: {collision_count}", flush=True)
+            print(f"physx_mimic_count_after_patch: {mimic_count}", flush=True)
             if collision_count == 0:
                 raise SystemExit(f"Patch completed but no CollisionAPI prims are visible: {usd}")
     finally:
