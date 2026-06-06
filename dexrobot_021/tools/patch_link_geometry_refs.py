@@ -17,6 +17,7 @@ instance proxies. URDF ``mimic`` tags are also re-authored as
 from __future__ import annotations
 
 import argparse
+import math
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -73,11 +74,15 @@ def _patch_physx_mimics(stage, root_path, root_usd: Path) -> int:
         if not stage.GetPrimAtPath(driver_path).IsValid():
             raise RuntimeError(f"Missing mimic reference joint prim: {driver_path}")
 
+        # PhysX uses: target + gearing * reference + offset = 0.
+        # USD angular joint positions/offsets are authored in degrees, while URDF
+        # mimic offsets are radians.
+        usd_offset = math.degrees(offset) if joint.GetTypeName() == "PhysicsRevoluteJoint" else offset
         _apply_api_schema(joint, "PhysxMimicJointAPI:rotZ")
         joint.CreateRelationship("physxMimicJoint:rotZ:referenceJoint").SetTargets([driver_path])
         joint.CreateAttribute("physxMimicJoint:rotZ:referenceJointAxis", Sdf.ValueTypeNames.Token).Set("rotZ")
         joint.CreateAttribute("physxMimicJoint:rotZ:gearing", Sdf.ValueTypeNames.Float).Set(-multiplier)
-        joint.CreateAttribute("physxMimicJoint:rotZ:offset", Sdf.ValueTypeNames.Float).Set(-offset)
+        joint.CreateAttribute("physxMimicJoint:rotZ:offset", Sdf.ValueTypeNames.Float).Set(-usd_offset)
         joint.CreateAttribute("physxMimicJoint:rotZ:naturalFrequency", Sdf.ValueTypeNames.Float).Set(100.0)
         joint.CreateAttribute("physxMimicJoint:rotZ:dampingRatio", Sdf.ValueTypeNames.Float).Set(1.0)
         joint.CreateAttribute("drive:angular:physics:stiffness", Sdf.ValueTypeNames.Float).Set(0.0)
