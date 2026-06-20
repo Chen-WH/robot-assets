@@ -1,20 +1,20 @@
 <mujoco model="reorientation_cube">
   <asset>
     <texture name="cube" type="cube"
-             fileup="./textures/fileup.png"
-             fileback="./textures/fileback.png"
-             filedown="./textures/filedown.png"
-             filefront="./textures/filefront.png"
-             fileleft="./textures/fileleft.png"
-             fileright="./textures/fileright.png"/>
+             fileup="../textures/fileup.png"
+             fileback="../textures/fileback.png"
+             filedown="../textures/filedown.png"
+             filefront="../textures/filefront.png"
+             fileleft="../textures/fileleft.png"
+             fileright="../textures/fileright.png"/>
     <material name="cube" texture="cube"/>
     <texture name="graycube" type="cube"
-            fileup="./textures/grayup.png"
-             fileback="./textures/grayback.png"
-             filedown="./textures/graydown.png"
-             filefront="./textures/grayfront.png"
-             fileleft="./textures/grayleft.png"
-             fileright="./textures/grayright.png"/>
+            fileup="../textures/grayup.png"
+             fileback="../textures/grayback.png"
+             filedown="../textures/graydown.png"
+             filefront="../textures/grayfront.png"
+             fileleft="../textures/grayleft.png"
+             fileright="../textures/grayright.png"/>
     <material name="graycube" texture="graycube"/>
     <!-- simple colored materials for axis visualization -->
     <material name="red" rgba="1 0 0 1"/>
@@ -32,11 +32,11 @@
 
       <!-- visualization axes (rotate with cube) -->
       <!-- X axis: red -->
-      <geom name="axis_x" type="box" size=".03 .002 .002" pos=".03 0 0" material="red"/>
+      <geom name="axis_x" type="box" size=".03 .002 .002" pos=".03 0 0" material="red" contype="0" conaffinity="0" density="0"/>
       <!-- Y axis: green -->
-      <geom name="axis_y" type="box" size=".003 .03 .002" pos="0 .03 0" material="green"/>
+      <geom name="axis_y" type="box" size=".003 .03 .002" pos="0 .03 0" material="green" contype="0" conaffinity="0" density="0"/>
       <!-- Z axis: blue -->
-      <geom name="axis_z" type="box" size=".003 .002 .03" pos="0 0 .03" material="blue"/>
+      <geom name="axis_z" type="box" size=".003 .002 .03" pos="0 0 .03" material="blue" contype="0" conaffinity="0" density="0"/>
     </body>
   </worldbody>
 
