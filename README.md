@@ -25,6 +25,10 @@ A unified robot asset repository, covering robot descriptions, geometric resourc
 
 - robotiq_2f85: This package contains a simplified robot description (MJCF) of the [Robotiq 85mm 2-Finger Adaptive Gripper](https://robotiq.com/products/2f85-140-adaptive-robot-gripper) developed by [Robotiq](https://robotiq.com/). It is derived from the [publicly available URDF description](https://github.com/ros-industrial/robotiq/tree/kinetic-devel/robotiq_2f_85_gripper_visualization).
 
+## Stanford TidyBot
+
+- stanford_tidybot: This package contains a Stanford TidyBot-style mobile manipulator description with MJCF assets from MuJoCo Menagerie and a lightweight URDF for TetraPGA/GA-OCP. The URDF uses a 3-DoF planar mobile base represented by serial x, y, and yaw joints, followed by a 7-DoF Kinova Gen3 arm.
+
 ## Intel RealSense D435i
 
 - realsense_d435i: This package contains a simplified robot description (MJCF) of the [Realsense D435i](https://www.intelrealsense.com/depth-camera-d435i/) camera developed by Intel. It is derived from the [publicly available URDF description](https://github.com/IntelRealSense/realsense-ros/blob/ros2-development/realsense2_description/urdf/_d435i.urdf.xacro) with modifications by [Binit Shah](https://www.linkedin.com/in/binit-shah) to include colors.

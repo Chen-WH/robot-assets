@@ -1,0 +1,350 @@
+<?xml version="1.0"?>
+<robot name="tidybot_gen3_10dof">
+  <!--
+    Lightweight URDF model for TetraPGA examples/tests.
+
+    The mobile base is represented as three serial 1-DoF joints:
+      base_x_joint, base_y_joint, base_yaw_joint.
+    This avoids URDF planar/floating joints so it stays on the R/P joint path
+    implemented by TetraPGA.
+
+    The Kinova Gen3 arm inertial and joint data follows the Stanford TidyBot /
+    Gen3 descriptions. The Robotiq gripper is modeled as a fixed terminal load,
+    because the full 2F-85 mimic/closed-chain mechanism is not needed for a
+    3-DoF base + 7-DoF arm dynamics example.
+  -->
+
+  <material name="base_gray">
+    <color rgba="0.55 0.58 0.57 1"/>
+  </material>
+  <material name="dark_gray">
+    <color rgba="0.15 0.15 0.14 1"/>
+  </material>
+  <material name="arm_gray">
+    <color rgba="0.75294 0.75294 0.75294 1"/>
+  </material>
+
+  <link name="world"/>
+
+  <link name="mobile_x_link"/>
+  <joint name="base_x_joint" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="world"/>
+    <child link="mobile_x_link"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="1000" lower="-10" upper="10" velocity="2"/>
+  </joint>
+
+  <link name="mobile_y_link"/>
+  <joint name="base_y_joint" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="mobile_x_link"/>
+    <child link="mobile_y_link"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="1000" lower="-10" upper="10" velocity="2"/>
+  </joint>
+
+  <link name="mobile_yaw_link"/>
+  <joint name="base_yaw_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="mobile_y_link"/>
+    <child link="mobile_yaw_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1000" lower="-6.283185307179586" upper="6.283185307179586" velocity="4"/>
+  </joint>
+
+  <link name="base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0.16"/>
+      <mass value="60"/>
+      <inertia ixx="1.4625" ixy="0" ixz="0" iyy="1.8020" iyz="0" izz="2.3645"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.16"/>
+      <geometry>
+        <box size="0.55 0.45 0.30"/>
+      </geometry>
+      <material name="base_gray"/>
+    </visual>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.325"/>
+      <geometry>
+        <box size="0.42 0.34 0.03"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.16"/>
+      <geometry>
+        <box size="0.55 0.45 0.30"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_mount_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="mobile_yaw_link"/>
+    <child link="base_link"/>
+  </joint>
+
+  <link name="base_camera_link"/>
+  <joint name="base_camera_joint" type="fixed">
+    <origin rpy="0 0.7853981633974483 -1.5707963267948966" xyz="0.2525 0 0.335"/>
+    <parent link="base_link"/>
+    <child link="base_camera_link"/>
+  </joint>
+
+  <link name="gen3_base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.000648 -0.000166 0.084487"/>
+      <mass value="1.697"/>
+      <inertia ixx="0.004622" ixy="0.000009" ixz="0.000060" iyy="0.004495" iyz="0.000009" izz="0.002079"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.06"/>
+      <geometry>
+        <cylinder radius="0.085" length="0.12"/>
+      </geometry>
+      <material name="arm_gray"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.06"/>
+      <geometry>
+        <cylinder radius="0.085" length="0.12"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="arm_mount_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.335"/>
+    <parent link="base_link"/>
+    <child link="gen3_base_link"/>
+  </joint>
+
+  <link name="gen3_shoulder_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.000023 -0.010364 -0.07336"/>
+      <mass value="1.3773"/>
+      <inertia ixx="0.00457" ixy="0.000001" ixz="0.000002" iyy="0.004831" iyz="0.000448" izz="0.001409"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.045"/>
+      <geometry>
+        <cylinder radius="0.075" length="0.12"/>
+      </geometry>
+      <material name="arm_gray"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.045"/>
+      <geometry>
+        <cylinder radius="0.075" length="0.12"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_1" type="revolute">
+    <origin rpy="3.1416 0 0" xyz="0 0 0.15643"/>
+    <parent link="gen3_base_link"/>
+    <child link="gen3_shoulder_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="39" lower="-6.283185307179586" upper="6.283185307179586" velocity="1.3963"/>
+  </joint>
+
+  <link name="gen3_half_arm_1_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.000044 -0.09958 -0.013278"/>
+      <mass value="1.1636"/>
+      <inertia ixx="0.011088" ixy="0.000005" ixz="0" iyy="0.001072" iyz="-0.000691" izz="0.011255"/>
+    </inertial>
+    <visual>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 -0.095 0"/>
+      <geometry>
+        <cylinder radius="0.045" length="0.20"/>
+      </geometry>
+      <material name="arm_gray"/>
+    </visual>
+    <collision>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 -0.095 0"/>
+      <geometry>
+        <cylinder radius="0.045" length="0.20"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_2" type="revolute">
+    <origin rpy="1.5708 0 0" xyz="0 0.005375 -0.12838"/>
+    <parent link="gen3_shoulder_link"/>
+    <child link="gen3_half_arm_1_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="39" lower="-2.24" upper="2.24" velocity="1.3963"/>
+  </joint>
+
+  <link name="gen3_half_arm_2_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.000044 -0.006641 -0.117892"/>
+      <mass value="1.1636"/>
+      <inertia ixx="0.010932" ixy="0" ixz="-0.000007" iyy="0.011127" iyz="0.000606" izz="0.001043"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.10"/>
+      <geometry>
+        <cylinder radius="0.045" length="0.20"/>
+      </geometry>
+      <material name="arm_gray"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.10"/>
+      <geometry>
+        <cylinder radius="0.045" length="0.20"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_3" type="revolute">
+    <origin rpy="-1.5708 0 0" xyz="0 -0.21038 -0.006375"/>
+    <parent link="gen3_half_arm_1_link"/>
+    <child link="gen3_half_arm_2_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="39" lower="-6.283185307179586" upper="6.283185307179586" velocity="1.3963"/>
+  </joint>
+
+  <link name="gen3_forearm_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.000018 -0.075478 -0.015006"/>
+      <mass value="0.9302"/>
+      <inertia ixx="0.008147" ixy="-0.000001" ixz="0" iyy="0.000631" iyz="-0.0005" izz="0.008316"/>
+    </inertial>
+    <visual>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 -0.075 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.17"/>
+      </geometry>
+      <material name="arm_gray"/>
+    </visual>
+    <collision>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 -0.075 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.17"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_4" type="revolute">
+    <origin rpy="1.5708 0 0" xyz="0 0.006375 -0.21038"/>
+    <parent link="gen3_half_arm_2_link"/>
+    <child link="gen3_forearm_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="39" lower="-2.57" upper="2.57" velocity="1.3963"/>
+  </joint>
+
+  <link name="gen3_spherical_wrist_1_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.000001 -0.009432 -0.063883"/>
+      <mass value="0.6781"/>
+      <inertia ixx="0.001596" ixy="0" ixz="0" iyy="0.001607" iyz="0.000256" izz="0.000399"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.045"/>
+      <geometry>
+        <cylinder radius="0.038" length="0.09"/>
+      </geometry>
+      <material name="arm_gray"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.045"/>
+      <geometry>
+        <cylinder radius="0.038" length="0.09"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_5" type="revolute">
+    <origin rpy="-1.5708 0 0" xyz="0 -0.20843 -0.006375"/>
+    <parent link="gen3_forearm_link"/>
+    <child link="gen3_spherical_wrist_1_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="9" lower="-6.283185307179586" upper="6.283185307179586" velocity="1.2218"/>
+  </joint>
+
+  <link name="gen3_spherical_wrist_2_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.000001 -0.045483 -0.00965"/>
+      <mass value="0.6781"/>
+      <inertia ixx="0.001641" ixy="0" ixz="0" iyy="0.00041" iyz="-0.000278" izz="0.001641"/>
+    </inertial>
+    <visual>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 -0.035 0"/>
+      <geometry>
+        <cylinder radius="0.035" length="0.08"/>
+      </geometry>
+      <material name="arm_gray"/>
+    </visual>
+    <collision>
+      <origin rpy="1.5707963267948966 0 0" xyz="0 -0.035 0"/>
+      <geometry>
+        <cylinder radius="0.035" length="0.08"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_6" type="revolute">
+    <origin rpy="1.5708 0 0" xyz="0 0.00017505 -0.10593"/>
+    <parent link="gen3_spherical_wrist_1_link"/>
+    <child link="gen3_spherical_wrist_2_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="9" lower="-2.09" upper="2.09" velocity="1.2218"/>
+  </joint>
+
+  <link name="gen3_bracelet_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.000281 0.011402 -0.029798"/>
+      <mass value="0.5"/>
+      <inertia ixx="0.000587" ixy="0.000003" ixz="0.000003" iyy="0.000369" iyz="-0.000118" izz="0.000609"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 -0.025"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.05"/>
+      </geometry>
+      <material name="arm_gray"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 -0.025"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="joint_7" type="revolute">
+    <origin rpy="-1.5708 0 0" xyz="0 -0.10593 -0.00017505"/>
+    <parent link="gen3_spherical_wrist_2_link"/>
+    <child link="gen3_bracelet_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="9" lower="-6.283185307179586" upper="6.283185307179586" velocity="1.2218"/>
+  </joint>
+
+  <link name="robotiq_2f85_base_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0.0354675"/>
+      <mass value="0.777441"/>
+      <inertia ixx="0.000260285" ixy="0" ixz="0" iyy="0.000225381" iyz="0" izz="0.000152708"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.04"/>
+      <geometry>
+        <box size="0.08 0.10 0.08"/>
+      </geometry>
+      <material name="dark_gray"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.04"/>
+      <geometry>
+        <box size="0.08 0.10 0.08"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="gripper_mount_joint" type="fixed">
+    <origin rpy="3.141592653589793 0 1.5707963267948966" xyz="0 0 -0.061525"/>
+    <parent link="gen3_bracelet_link"/>
+    <child link="robotiq_2f85_base_link"/>
+  </joint>
+
+  <link name="tool_frame"/>
+  <joint name="tool_frame_joint" type="fixed">
+    <origin rpy="3.141592653589793 0 0" xyz="0 0 -0.181525"/>
+    <parent link="gen3_bracelet_link"/>
+    <child link="tool_frame"/>
+  </joint>
+</robot>
