@@ -22,7 +22,7 @@
   <option timestep="0.0025" gravity="0 0 0"/>
 
   <!-- include UR10 model (relative path) -->
-  <include file="ur10_manipulation.xml"/>
+  <include file="../../ur10/mjcf/ur10.xml"/>
 
   <worldbody>
     <!-- directional light and ground plane (from ur10 scene) -->

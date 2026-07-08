@@ -50,8 +50,8 @@
       <geom mesh="d435i_7" material="RGB_Pupil" class="visual"/>
       <geom mesh="d435i_8" mass="0.072" material="Metal_Casing" class="visual"/>
       <geom class="collision" type="capsule" mesh="d435i_8"/>
-      <camera name="d435i_depth" pos="0 0 0" fovy="70" quat="0 0.707107 -0.707107 0" />
-      <camera name="d435i_rgb" pos="0.032 0 0" fovy="75" quat="0 0.707107 -0.707107 0" />
+      <camera name="d435i_rgb" pos="0.03 0 0" fovy="42.5" quat="0 0 -1 0" resolution="1920 1080" output="rgb" />
+      <camera name="d435i_depth" pos="0.015 0 0" fovy="57" quat="0 0 -1 0" resolution="1280 720" output="depth" />
     </body>
   </worldbody>
 </mujoco>
