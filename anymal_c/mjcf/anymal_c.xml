@@ -1,5 +1,5 @@
 <mujoco model="anymal_c">
-  <compiler angle="radian" meshdir="assets" texturedir="assets" autolimits="true"/>
+  <compiler angle="radian" meshdir="../assets" texturedir="../assets" autolimits="true"/>
 
   <option cone="elliptic" impratio="100"/>
 

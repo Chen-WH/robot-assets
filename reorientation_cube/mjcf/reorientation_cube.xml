@@ -28,7 +28,14 @@
     <body name="cube" pos="0.0 0.0 0.5" quat="0 1 0 0">
       <freejoint/>
       <!-- main cube -->
-      <geom name="cube" type="box" size=".03 .03 .03" mass=".122" material="cube"/>
+      <!-- Friction is declared on the hand side: MuJoCo takes the elementwise max of
+           the two geoms, so leaving this at the 1.0 default would put a floor under
+           any hand-side value and make randomising below 1.0 a no-op.  This applies
+           per axis: the torsional term was 0.005 here against the hand's 0.003, so the
+           moment condim went to 4 the cube would have governed it.  Every axis must
+           sit below anything the hand will ever use. -->
+      <geom name="cube" type="box" size=".03 .03 .03" mass=".122" material="cube"
+            friction="0.05 0.0001 0.0001"/>
 
       <!-- visualization axes (rotate with cube) -->
       <!-- X axis: red -->

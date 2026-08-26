@@ -5,8 +5,67 @@
   </visual>
   <option gravity="0 0 -9.81" iterations="100" solver="Newton" integrator="implicit" timestep="0.001" />
   <default>
-    <joint damping="1" />
-    <geom condim="3" solref="0.02 1" solimp="0.9 0.95 0.001" friction="2 2 2" />
+    <!-- Drive parameters from Yuan et al., "Development of the Bioinspired
+         Tendon-Driven DexHand 021 With Proprioceptive Compliance Control",
+         IEEE RA-L 11(1), 2026 (Table I, Figs. 4/6/7).  The transmission is
+         hollow-cup DC motor -> planetary reducer -> worm gear -> capstan ->
+         tungsten cable, so the joints are stiff and poorly backdrivable; the
+         classes below name the three drive groups so the worm-gear Coulomb
+         term can be set per group.  frictionloss is still 0: it is the least
+         identified parameter and is staged separately. -->
+    <joint damping="0.05" armature="0.002" frictionloss="0" />
+    <!-- Cable-driven flexion: one motor -> one worm -> one capstan -> one
+         cable -> one joint, for the MCP (*_2) and PIP/DIP (*_4) of all five
+         fingers.  Ten of the twelve motors. -->
+    <!-- frictionloss: the worm gear is self-locking by design ("enhance static
+         locking capability"), and the letter attributes its own torque-estimation
+         error to "static friction in motor-gearbox/cable transmission".  No number
+         is published, so this is ~11-17% of the group's stall torque, the usual
+         band for a self-locking worm plus a sheathed capstan.  It is the least
+         identified parameter in the model and the first one to domain-randomise.
+         At kp=3 N*m/rad it costs a 1.9 deg breakaway deadband. -->
+    <default class="tendon_flexion">
+      <joint damping="0.05" armature="0.002" frictionloss="0.1" />
+    </default>
+    <!-- Geared direct drive: thumb CMR (motor + worm) and four-finger
+         abduction (motor + ball screw + crank linkage).  Two motors. -->
+    <default class="direct_drive">
+      <joint damping="0.05" armature="0.002" frictionloss="0.06" />
+    </default>
+    <!-- No motor: driven through a rigid linkage by <equality>.  PIP (*_3)
+         follows DIP (*_4); ring/little abduction follows the index. -->
+    <!-- No transmission upstream, so only pin-and-linkage friction. -->
+    <default class="passive_linkage">
+      <joint damping="0.05" armature="2e-4" frictionloss="0.02" />
+    </default>
+    <!-- friction = "tangential torsional rolling".
+
+         tangential 1.0: 2.0 was high enough for a policy to hold the cube by stiction
+         alone; 1.0 is the usual band for a rubber pad on a plastic cube, and is the
+         nominal the startup randomiser scales around.
+
+         torsional 0.003, and condim="4" so that it is ACTIVE.  This was condim="3"
+         until 2026-08-20, which makes the torsional coefficient inert -- a contact
+         then offers zero resistance to rotation about its own normal.  That is
+         harmless for reorientation, which rolls the object and is resisted by the
+         tangential term (measured: raising condim moves the reorient capability probe
+         by less than its noise).  It is decisive for spin about the axis the fingers
+         pinch across: the cube rotates about the contact normal, nothing resisted it,
+         and two distal links could hold 9.13 rad/s.  Restoring the term zero-shot cut
+         that to 2.00 rad/s.  See docs/03 and docs/04.
+
+         MuJoCo's torsional coefficient is in LENGTH units: the friction torque limit
+         is roughly mu_t * f_normal, and for a circular patch of radius a under
+         tangential mu it is about (2/3) mu a.  0.003 is a ~4.5 mm patch, right for a
+         lightly loaded fingertip.  The 0.02 that stood here implies a 30 mm patch --
+         the whole cube face -- and is what an inert value drifts to when nothing
+         checks it.  UNMEASURED: this belongs on the domain-randomisation list next to
+         frictionloss.
+
+         rolling 0.002 remains INERT at condim="4" (it needs 6).  Left declared rather
+         than removed so the value is not lost, but do not tune it expecting an effect,
+         and do not read it as a modelling claim. -->
+    <geom condim="4" solref="0.02 1" solimp="0.9 0.95 0.001" friction="1.0 0.003 0.002" />
     <default class="visual">
       <geom contype="0" conaffinity="0" group="2" density="0" />
     </default>
@@ -66,22 +125,22 @@
       <geom name="left_hand_base_collision" type="mesh" mesh="left_hand_base_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
       <body name="l_f_link1_1" pos="0.032783 -0.023781 0.11211" quat="0.775383 -0.151562 0.0221299 -0.612635">
         <inertial pos="0.00198057 -0.000351992 -0.0134513" quat="0.716547 0.0775675 0.0530798 0.691178" mass="0.00440965" diaginertia="4.39524e-07 3.79859e-07 1.98262e-07" />
-        <joint name="l_f_joint1_1" pos="0 0 0" axis="0 0 1" range="0 2.2" actuatorfrcrange="-10 10" />
+        <joint name="l_f_joint1_1" class="direct_drive" pos="0 0 0" axis="0 0 1" range="0 2.2" actuatorfrcrange="-10 10" />
         <geom name="l_f_link1_1_visual" type="mesh" mesh="l_f_link1_1" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
         <geom name="l_f_link1_1_collision" type="mesh" mesh="l_f_link1_1_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
         <body name="l_f_link1_2" pos="0.0083307 0 0" quat="0.707105 0.707108 0 0">
           <inertial pos="0.021435 0.000179938 0.0012982" quat="0.016958 0.707385 -0.0126923 0.706511" mass="0.00995163" diaginertia="1.70991e-06 1.65549e-06 6.19029e-07" />
-          <joint name="l_f_joint1_2" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+          <joint name="l_f_joint1_2" class="tendon_flexion" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
           <geom name="l_f_link1_2_visual" type="mesh" mesh="l_f_link1_2" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
           <geom name="l_f_link1_2_collision" type="mesh" mesh="l_f_link1_2_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
           <body name="l_f_link1_3" pos="0.043 0 0">
             <inertial pos="0.0134587 -0.000699415 0.00129313" quat="0.0207134 0.706891 -0.0204889 0.706722" mass="0.00457275" diaginertia="3.79726e-07 3.56511e-07 2.03184e-07" />
-            <joint name="l_f_joint1_3" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+            <joint name="l_f_joint1_3" class="passive_linkage" pos="0 0 0" axis="0 0 1" range="0 1.39" actuatorfrcrange="-10 10" />
             <geom name="l_f_link1_3_visual" type="mesh" mesh="l_f_link1_3" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
             <geom name="l_f_link1_3_collision" type="mesh" mesh="l_f_link1_3_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
             <body name="l_f_link1_4" pos="0.025 0 0">
               <inertial pos="0.0167833 -0.00318009 0.00181094" quat="0.630522 0.468826 0.519894 0.335191" mass="0.00715824" diaginertia="7.99378e-07 7.54706e-07 3.17055e-07" />
-              <joint name="l_f_joint1_4" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+              <joint name="l_f_joint1_4" class="tendon_flexion" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
               <geom name="l_f_link1_4_visual" type="mesh" mesh="l_f_link1_4" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
               <geom name="l_f_link1_4_collision" type="mesh" mesh="l_f_link1_4_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
               <body name="l_f_link1_pad" pos="0.026 0.0025 0.001" quat="0.9747941071 0 0 -0.2231063621">
@@ -96,22 +155,22 @@
       </body>
       <body name="l_f_link2_1" pos="0.006966 -0.034912 0.1644" quat="-2.59734e-06 0.707105 2.59735e-06 0.707108">
         <inertial pos="0.00700212 1.08537e-07 -0.00096856" quat="0.370763 0.602117 0.602108 0.370749" mass="0.00409701" diaginertia="3.18122e-07 2.71723e-07 2.04204e-07" />
-        <joint name="l_f_joint2_1" pos="0 0 0" axis="0 0 1" range="0 0.316" actuatorfrcrange="-10 10" />
+        <joint name="l_f_joint2_1" class="direct_drive" pos="0 0 0" axis="0 0 1" range="0 0.316" actuatorfrcrange="-10 10" />
         <geom name="l_f_link2_1_visual" type="mesh" mesh="l_f_link2_1" contype="0" conaffinity="0" group="2" density="0" rgba="0.792157 0.819608 0.933333 1" class="visual" />
         <geom name="l_f_link2_1_collision" type="mesh" mesh="l_f_link2_1_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
         <body name="l_f_link2_2" pos="0.017 0 0" quat="0.707105 0.707108 0 0">
           <inertial pos="0.0211622 -0.000590378 2.72622e-06" quat="0.502474 0.508577 0.49194 0.496854" mass="0.0094283" diaginertia="1.65781e-06 1.64333e-06 5.5432e-07" />
-          <joint name="l_f_joint2_2" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+          <joint name="l_f_joint2_2" class="tendon_flexion" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
           <geom name="l_f_link2_2_visual" type="mesh" mesh="l_f_link2_2" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
           <geom name="l_f_link2_2_collision" type="mesh" mesh="l_f_link2_2_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
           <body name="l_f_link2_3" pos="0.043 0 0">
             <inertial pos="0.0134587 -0.000699415 7.12893e-07" quat="0.0207134 0.706891 -0.0204889 0.706722" mass="0.00457275" diaginertia="3.79726e-07 3.56511e-07 2.03184e-07" />
-            <joint name="l_f_joint2_3" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+            <joint name="l_f_joint2_3" class="passive_linkage" pos="0 0 0" axis="0 0 1" range="0 1.39" actuatorfrcrange="-10 10" />
             <geom name="l_f_link2_3_visual" type="mesh" mesh="l_f_link2_3" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
             <geom name="l_f_link2_3_collision" type="mesh" mesh="l_f_link2_3_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
             <body name="l_f_link2_4" pos="0.025 0 0">
               <inertial pos="0.0167833 -0.00318009 0.000699111" quat="0.634953 0.463467 0.52111 0.332381" mass="0.00715824" diaginertia="8.11162e-07 7.52749e-07 3.26586e-07" />
-              <joint name="l_f_joint2_4" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+              <joint name="l_f_joint2_4" class="tendon_flexion" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
               <geom name="l_f_link2_4_visual" type="mesh" mesh="l_f_link2_4" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
               <geom name="l_f_link2_4_collision" type="mesh" mesh="l_f_link2_4_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
               <body name="l_f_link2_pad" pos="0.026 0.0025 0.000" quat="0.9747941071 0 0 -0.2231063621">
@@ -130,17 +189,17 @@
         <geom name="l_f_link3_1_collision" type="mesh" mesh="l_f_link3_1_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
         <body name="l_f_link3_2" pos="0.017 0 0" quat="0.707105 0.707108 0 0">
           <inertial pos="0.0211622 -0.000590378 2.72622e-06" quat="0.502474 0.508577 0.49194 0.496854" mass="0.0094283" diaginertia="1.65781e-06 1.64333e-06 5.5432e-07" />
-          <joint name="l_f_joint3_2" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+          <joint name="l_f_joint3_2" class="tendon_flexion" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
           <geom name="l_f_link3_2_visual" type="mesh" mesh="l_f_link3_2" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
           <geom name="l_f_link3_2_collision" type="mesh" mesh="l_f_link3_2_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
           <body name="l_f_link3_3" pos="0.043 0 0">
             <inertial pos="0.0134587 -0.000699415 7.12894e-07" quat="0.0207134 0.706891 -0.0204889 0.706722" mass="0.00457275" diaginertia="3.79726e-07 3.56511e-07 2.03184e-07" />
-            <joint name="l_f_joint3_3" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+            <joint name="l_f_joint3_3" class="passive_linkage" pos="0 0 0" axis="0 0 1" range="0 1.39" actuatorfrcrange="-10 10" />
             <geom name="l_f_link3_3_visual" type="mesh" mesh="l_f_link3_3" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
             <geom name="l_f_link3_3_collision" type="mesh" mesh="l_f_link3_3_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
             <body name="l_f_link3_4" pos="0.025 0 0">
               <inertial pos="0.0167833 -0.00318009 0.000699111" quat="0.634953 0.463467 0.52111 0.332381" mass="0.00715824" diaginertia="8.11162e-07 7.52749e-07 3.26586e-07" />
-              <joint name="l_f_joint3_4" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+              <joint name="l_f_joint3_4" class="tendon_flexion" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
               <geom name="l_f_link3_4_visual" type="mesh" mesh="l_f_link3_4" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
               <geom name="l_f_link3_4_collision" type="mesh" mesh="l_f_link3_4_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
               <body name="l_f_link3_pad" pos="0.026 0.0025 0.000" quat="0.9747941071 0 0 -0.2231063621">
@@ -155,22 +214,22 @@
       </body>
       <body name="l_f_link4_1" pos="0.006966 0.013688 0.1644" quat="0.707105 0 -0.707108 0">
         <inertial pos="0.00700212 -1.07487e-07 0.000968558" quat="0.602109 0.370749 0.370763 0.602117" mass="0.00409701" diaginertia="3.18122e-07 2.71723e-07 2.04204e-07" />
-        <joint name="l_f_joint4_1" pos="0 0 0" axis="0 0 1" range="0 0.316" actuatorfrcrange="-10 10" />
+        <joint name="l_f_joint4_1" class="passive_linkage" pos="0 0 0" axis="0 0 1" range="0 0.316" actuatorfrcrange="-10 10" />
         <geom name="l_f_link4_1_visual" type="mesh" mesh="l_f_link4_1" contype="0" conaffinity="0" group="2" density="0" rgba="0.792157 0.819608 0.933333 1" class="visual" />
         <geom name="l_f_link4_1_collision" type="mesh" mesh="l_f_link4_1_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
         <body name="l_f_link4_2" pos="0.017 0 0" quat="0.707105 -0.707108 0 0">
           <inertial pos="0.0211622 -0.000590378 2.72622e-06" quat="0.502474 0.508577 0.49194 0.496854" mass="0.0094283" diaginertia="1.65781e-06 1.64333e-06 5.5432e-07" />
-          <joint name="l_f_joint4_2" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+          <joint name="l_f_joint4_2" class="tendon_flexion" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
           <geom name="l_f_link4_2_visual" type="mesh" mesh="l_f_link4_2" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
           <geom name="l_f_link4_2_collision" type="mesh" mesh="l_f_link4_2_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
           <body name="l_f_link4_3" pos="0.043 0 0">
             <inertial pos="0.0134587 -0.000699415 7.12894e-07" quat="0.0207134 0.706891 -0.0204889 0.706722" mass="0.00457275" diaginertia="3.79726e-07 3.56511e-07 2.03184e-07" />
-            <joint name="l_f_joint4_3" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+            <joint name="l_f_joint4_3" class="passive_linkage" pos="0 0 0" axis="0 0 1" range="0 1.39" actuatorfrcrange="-10 10" />
             <geom name="l_f_link4_3_visual" type="mesh" mesh="l_f_link4_3" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
             <geom name="l_f_link4_3_collision" type="mesh" mesh="l_f_link4_3_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
             <body name="l_f_link4_4" pos="0.025 0 0">
               <inertial pos="0.0167833 -0.00318009 0.000699111" quat="0.634953 0.463467 0.52111 0.332381" mass="0.00715824" diaginertia="8.11162e-07 7.52749e-07 3.26586e-07" />
-              <joint name="l_f_joint4_4" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+              <joint name="l_f_joint4_4" class="tendon_flexion" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
               <geom name="l_f_link4_4_visual" type="mesh" mesh="l_f_link4_4" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
               <geom name="l_f_link4_4_collision" type="mesh" mesh="l_f_link4_4_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
               <body name="l_f_link4_pad" pos="0.026 0.0025 0.000" quat="0.9747941071 0 0 -0.2231063621">
@@ -185,22 +244,22 @@
       </body>
       <body name="l_f_link5_1" pos="0.006966 0.037988 0.1504" quat="0.707105 0 -0.707108 0">
         <inertial pos="0.00700212 -1.08915e-07 0.000968551" quat="0.602109 0.370749 0.370763 0.602117" mass="0.00409701" diaginertia="3.18122e-07 2.71723e-07 2.04203e-07" />
-        <joint name="l_f_joint5_1" pos="0 0 0" axis="0 0 1" range="0 0.6" actuatorfrcrange="-10 10" />
+        <joint name="l_f_joint5_1" class="passive_linkage" pos="0 0 0" axis="0 0 1" range="0 0.6" actuatorfrcrange="-10 10" />
         <geom name="l_f_link5_1_visual" type="mesh" mesh="l_f_link5_1" contype="0" conaffinity="0" group="2" density="0" rgba="0.792157 0.819608 0.933333 1" class="visual" />
         <geom name="l_f_link5_1_collision" type="mesh" mesh="l_f_link5_1_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
         <body name="l_f_link5_2" pos="0.017 0 0" quat="0.707105 -0.707108 0 0">
           <inertial pos="0.0211622 -0.000590378 2.72622e-06" quat="0.502474 0.508577 0.49194 0.496854" mass="0.0094283" diaginertia="1.65781e-06 1.64333e-06 5.5432e-07" />
-          <joint name="l_f_joint5_2" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+          <joint name="l_f_joint5_2" class="tendon_flexion" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
           <geom name="l_f_link5_2_visual" type="mesh" mesh="l_f_link5_2" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
           <geom name="l_f_link5_2_collision" type="mesh" mesh="l_f_link5_2_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
           <body name="l_f_link5_3" pos="0.043 0 0">
             <inertial pos="0.0134587 -0.000699415 7.12894e-07" quat="0.0207134 0.706891 -0.0204889 0.706722" mass="0.00457275" diaginertia="3.79726e-07 3.56511e-07 2.03184e-07" />
-            <joint name="l_f_joint5_3" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+            <joint name="l_f_joint5_3" class="passive_linkage" pos="0 0 0" axis="0 0 1" range="0 1.39" actuatorfrcrange="-10 10" />
             <geom name="l_f_link5_3_visual" type="mesh" mesh="l_f_link5_3" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
             <geom name="l_f_link5_3_collision" type="mesh" mesh="l_f_link5_3_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
             <body name="l_f_link5_4" pos="0.025 0 0">
               <inertial pos="0.0167833 -0.00318009 0.000699111" quat="0.634953 0.463467 0.52111 0.332381" mass="0.00715824" diaginertia="8.11162e-07 7.52749e-07 3.26586e-07" />
-              <joint name="l_f_joint5_4" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
+              <joint name="l_f_joint5_4" class="tendon_flexion" pos="0 0 0" axis="0 0 1" range="0 1.3" actuatorfrcrange="-10 10" />
               <geom name="l_f_link5_4_visual" type="mesh" mesh="l_f_link5_4" contype="0" conaffinity="0" group="2" density="0" rgba="0.6 0.6 0.6 1" class="visual" />
               <geom name="l_f_link5_4_collision" type="mesh" mesh="l_f_link5_4_convex" contype="0" conaffinity="1" group="1" density="0" class="collision" />
               <body name="l_f_link5_pad" pos="0.026 0.0025 0.000" quat="0.9747941071 0 0 -0.2231063621">
@@ -225,18 +284,54 @@
     <joint joint1="l_f_joint5_3" joint2="l_f_joint5_4" polycoef="0.0007 1.5107 -0.5578 0.2382 -0.0577" solimp="0.95 0.99 0.001" solref="0.005 1" />
   </equality>
   <actuator>
-    <position name="act_l_f_joint1_2" joint="l_f_joint1_2" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20" />
-    <position name="act_l_f_joint1_4" joint="l_f_joint1_4" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20" />
-    <position name="act_l_f_joint2_2" joint="l_f_joint2_2" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20" />
-    <position name="act_l_f_joint2_4" joint="l_f_joint2_4" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20" />
-    <position name="act_l_f_joint3_2" joint="l_f_joint3_2" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20" />
-    <position name="act_l_f_joint3_4" joint="l_f_joint3_4" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20" />
-    <position name="act_l_f_joint4_2" joint="l_f_joint4_2" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20" />
-    <position name="act_l_f_joint4_4" joint="l_f_joint4_4" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20" />
-    <position name="act_l_f_joint5_2" joint="l_f_joint5_2" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20" />
-    <position name="act_l_f_joint5_4" joint="l_f_joint5_4" kp="20" kv="0.1" ctrlrange="0 1.3" forcerange="-20 20" />
-    <position name="act_l_f_joint1_1" joint="l_f_joint1_1" kp="20" kv="1" ctrlrange="0 2.2" forcerange="-20 20" />
-    <position name="act_l_f_joint2_1" joint="l_f_joint2_1" kp="20" kv="1" ctrlrange="0 0.316" forcerange="-20 20" />
+    <!-- finger 1 MCP flexion, cable: 10 N at 94 mm -->
+    <dcmotor name="act_l_f_joint1_2" joint="l_f_joint1_2" input="position"
+             nominal="24 0.9 3.49" saturation="0.9 0 0"
+             controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
+    <!-- finger 1 PIP/DIP pair, cable: 10 N at 56-103 mm -->
+    <dcmotor name="act_l_f_joint1_4" joint="l_f_joint1_4" input="position"
+             nominal="24 0.6 3.49" saturation="0.6 0 0"
+             controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
+    <!-- finger 2 MCP flexion, cable: 10 N at 94 mm -->
+    <dcmotor name="act_l_f_joint2_2" joint="l_f_joint2_2" input="position"
+             nominal="24 0.9 3.49" saturation="0.9 0 0"
+             controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
+    <!-- finger 2 PIP/DIP pair, cable: 10 N at 56-103 mm -->
+    <dcmotor name="act_l_f_joint2_4" joint="l_f_joint2_4" input="position"
+             nominal="24 0.6 3.49" saturation="0.6 0 0"
+             controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
+    <!-- finger 3 MCP flexion, cable: 10 N at 94 mm -->
+    <dcmotor name="act_l_f_joint3_2" joint="l_f_joint3_2" input="position"
+             nominal="24 0.9 3.49" saturation="0.9 0 0"
+             controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
+    <!-- finger 3 PIP/DIP pair, cable: 10 N at 56-103 mm -->
+    <dcmotor name="act_l_f_joint3_4" joint="l_f_joint3_4" input="position"
+             nominal="24 0.6 3.49" saturation="0.6 0 0"
+             controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
+    <!-- finger 4 MCP flexion, cable: 10 N at 94 mm -->
+    <dcmotor name="act_l_f_joint4_2" joint="l_f_joint4_2" input="position"
+             nominal="24 0.9 3.49" saturation="0.9 0 0"
+             controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
+    <!-- finger 4 PIP/DIP pair, cable: 10 N at 56-103 mm -->
+    <dcmotor name="act_l_f_joint4_4" joint="l_f_joint4_4" input="position"
+             nominal="24 0.6 3.49" saturation="0.6 0 0"
+             controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
+    <!-- finger 5 MCP flexion, cable: 10 N at 94 mm -->
+    <dcmotor name="act_l_f_joint5_2" joint="l_f_joint5_2" input="position"
+             nominal="24 0.9 3.49" saturation="0.9 0 0"
+             controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
+    <!-- finger 5 PIP/DIP pair, cable: 10 N at 56-103 mm -->
+    <dcmotor name="act_l_f_joint5_4" joint="l_f_joint5_4" input="position"
+             nominal="24 0.6 3.49" saturation="0.6 0 0"
+             controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
+    <!-- thumb CMR, worm direct drive (unconfirmed) -->
+    <dcmotor name="act_l_f_joint1_1" joint="l_f_joint1_1" input="position"
+             nominal="24 1.2 3.49" saturation="1.2 0 0"
+             controller="60 0 2 0 0 24" ctrlrange="0 2.2" />
+    <!-- four-finger abduction, ball screw (unconfirmed) -->
+    <dcmotor name="act_l_f_joint2_1" joint="l_f_joint2_1" input="position"
+             nominal="24 0.8 3.49" saturation="0.8 0 0"
+             controller="90 0 3 0 0 24" ctrlrange="0 0.316" />
   </actuator>
   <sensor>
     <!-- Default for MuJoCo-Warp/MJLab RL: 3D net contact force in world frame over each pad site. -->
