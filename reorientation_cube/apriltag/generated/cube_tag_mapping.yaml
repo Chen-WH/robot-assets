@@ -1,0 +1,76 @@
+family: tag36h11
+layout: AprilTag 3 official 10x10 image
+print_scale: 1.0
+size_definition: detection corners at the 8x8 black-square boundary
+ids_reused_across_cube_sizes: true
+simultaneous_multi_size_identification_by_id: false
+cubes:
+  cube_50mm:
+    edge_size_m: 0.05
+    full_label_size_m: 0.05
+    detector_tag_size_m: 0.04
+    faces:
+      front:
+        id: 0
+        orientation: top edge toward TOP face
+      right:
+        id: 1
+        orientation: top edge toward TOP face
+      back:
+        id: 2
+        orientation: top edge toward TOP face
+      left:
+        id: 3
+        orientation: top edge toward TOP face
+      top:
+        id: 4
+        orientation: top edge toward BACK face
+      bottom:
+        id: 5
+        orientation: top edge toward FRONT face
+  cube_60mm:
+    edge_size_m: 0.06
+    full_label_size_m: 0.06
+    detector_tag_size_m: 0.048
+    faces:
+      front:
+        id: 0
+        orientation: top edge toward TOP face
+      right:
+        id: 1
+        orientation: top edge toward TOP face
+      back:
+        id: 2
+        orientation: top edge toward TOP face
+      left:
+        id: 3
+        orientation: top edge toward TOP face
+      top:
+        id: 4
+        orientation: top edge toward BACK face
+      bottom:
+        id: 5
+        orientation: top edge toward FRONT face
+  cube_70mm:
+    edge_size_m: 0.07
+    full_label_size_m: 0.07
+    detector_tag_size_m: 0.056
+    faces:
+      front:
+        id: 0
+        orientation: top edge toward TOP face
+      right:
+        id: 1
+        orientation: top edge toward TOP face
+      back:
+        id: 2
+        orientation: top edge toward TOP face
+      left:
+        id: 3
+        orientation: top edge toward TOP face
+      top:
+        id: 4
+        orientation: top edge toward BACK face
+      bottom:
+        id: 5
+        orientation: top edge toward FRONT face

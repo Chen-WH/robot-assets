@@ -40,6 +40,8 @@
     <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300" />
     <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2" />
     <material name="mount_gray" rgba="0.65 0.68 0.70 1" />
+    <material name="table_top" rgba="0.56 0.36 0.20 1" />
+    <material name="table_legs" rgba="0.20 0.20 0.20 1" />
     <mesh name="base" file="../../ur10/assets/base.stl" />
     <mesh name="shoulder" file="../../ur10/assets/shoulder.stl" />
     <mesh name="upperarm" file="../../ur10/assets/upperarm.stl" />
@@ -110,6 +112,16 @@
   <worldbody>
     <light pos="0 0 1.5" dir="0 0 -1" directional="true" />
     <geom name="floor" size="0 0 0.05" type="plane" material="groundplane" />
+    <!-- Table center is placed on the UR10 base +y axis while preserving the
+         approximately 0.774 m radial distance inferred from the AprilGrid.
+         Local +y is aligned with world +y (yaw=0). -->
+    <body name="table" pos="0 0.7736 0" quat="1 0 0 0">
+      <geom name="table_top" type="box" pos="0 0 1.055" size="0.35 0.35 0.02" material="table_top" />
+      <geom name="table_leg_nw" type="box" pos="-0.30 0.30 0.5175" size="0.025 0.025 0.5175" material="table_legs" />
+      <geom name="table_leg_ne" type="box" pos="0.30 0.30 0.5175" size="0.025 0.025 0.5175" material="table_legs" />
+      <geom name="table_leg_sw" type="box" pos="-0.30 -0.30 0.5175" size="0.025 0.025 0.5175" material="table_legs" />
+      <geom name="table_leg_se" type="box" pos="0.30 -0.30 0.5175" size="0.025 0.025 0.5175" material="table_legs" />
+    </body>
     <body name="link0" childclass="ur10" pos="0 0 0.96">
       <geom quat="-1 0 0 0" type="mesh" rgba="0.7 0.7 0.7 1" mesh="base" />
       <body name="shoulder_link" pos="0 0 0.1273" quat="0 0 0 1">
