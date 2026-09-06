@@ -25,18 +25,18 @@
          identified parameter in the model and the first one to domain-randomise.
          At kp=3 N*m/rad it costs a 1.9 deg breakaway deadband. -->
     <default class="tendon_flexion">
-      <joint damping="0.05" armature="0.002" frictionloss="0.1" />
+      <joint damping="0.035" armature="0.002" frictionloss="0.07" />
     </default>
     <!-- Geared direct drive: thumb CMR (motor + worm) and four-finger
          abduction (motor + ball screw + crank linkage).  Two motors. -->
     <default class="direct_drive">
-      <joint damping="0.05" armature="0.002" frictionloss="0.06" />
+      <joint damping="0.035" armature="0.002" frictionloss="0.042" />
     </default>
     <!-- No motor: driven through a rigid linkage by <equality>.  PIP (*_3)
          follows DIP (*_4); ring/little abduction follows the index. -->
     <!-- No transmission upstream, so only pin-and-linkage friction. -->
     <default class="passive_linkage">
-      <joint damping="0.05" armature="2e-4" frictionloss="0.02" />
+      <joint damping="0.035" armature="2e-4" frictionloss="0.014" />
     </default>
     <!-- friction = "tangential torsional rolling".
 
@@ -283,54 +283,90 @@
     <joint joint1="l_f_joint4_3" joint2="l_f_joint4_4" polycoef="0.0007 1.5107 -0.5578 0.2382 -0.0577" solimp="0.95 0.99 0.001" solref="0.005 1" />
     <joint joint1="l_f_joint5_3" joint2="l_f_joint5_4" polycoef="0.0007 1.5107 -0.5578 0.2382 -0.0577" solimp="0.95 0.99 0.001" solref="0.005 1" />
   </equality>
+  <!-- No-load speeds measured on the hardware 2026-09-05, one joint at a time
+       with nothing in the hand, by `armhand-mjlab/scripts/deploy/noload.py`; the
+       raw per-joint numbers are in `deploy/*/noload_speed.json`. They replace a
+       single derived 3.49 rad/s that every group carried.
+
+         group                measured p90   was    note
+         *_2 MCP flexion          5.15       3.49   model was 1.5x too slow
+         *_4 PIP/DIP pair         5.13       3.49   model was 1.5x too slow
+         1_1 thumb CMR            6.93       3.49   model was 2.0x too slow
+         2_1 abduction            1.17       3.49   model was 3.0x too FAST
+
+       The abduction row is the one to notice: it runs the other way, and one
+       shared `w` had been hiding it. That channel is a ball screw and crank,
+       mechanically unlike the cable-driven ones, and its `w` was never more than
+       the cable figure copied across.
+
+       Why this was wrong in the first place: 3.49 was derived, and nothing had
+       measured the plant the policy actually meets. Closed-loop runs on hardware
+       reached a median joint rate of 3.58 rad/s against a simulated 2.01, so the
+       real hand answered the same saturated position command with about twice
+       the motion per control period -- twice the loop gain the policy was
+       trained against.
+
+       Two things these numbers are NOT. They are the speed each joint holds
+       under no load, which sits slightly below the true no-load speed because
+       `frictionloss` opposes it even unloaded; the correction is 6-20 %, and
+       `frictionloss` is itself the least identified parameter in the model, so
+       it is left to randomisation rather than propagated here. And they are
+       symmetric, where the hardware is not: flexion runs consistently faster
+       than extension (7.60 vs 5.74 rad/s on `joint1_2`), which a `<dcmotor>`
+       envelope cannot express at all.
+
+       Stall torques below are unchanged and still derived -- `1_1` and `2_1`
+       remain guesses. Measuring one needs a dynamometer or a deliberate stall,
+       and a stall latches a board fault that outlives the session (docs/04 #16).
+  -->
   <actuator>
     <!-- finger 1 MCP flexion, cable: 10 N at 94 mm -->
     <dcmotor name="act_l_f_joint1_2" joint="l_f_joint1_2" input="position"
-             nominal="24 0.9 3.49" saturation="0.9 0 0"
+             nominal="24 0.9 7.06" saturation="0.9 0 0"
              controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 1 PIP/DIP pair, cable: 10 N at 56-103 mm -->
     <dcmotor name="act_l_f_joint1_4" joint="l_f_joint1_4" input="position"
-             nominal="24 0.6 3.49" saturation="0.6 0 0"
+             nominal="24 0.6 18.14" saturation="0.6 0 0"
              controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 2 MCP flexion, cable: 10 N at 94 mm -->
     <dcmotor name="act_l_f_joint2_2" joint="l_f_joint2_2" input="position"
-             nominal="24 0.9 3.49" saturation="0.9 0 0"
+             nominal="24 0.9 7.06" saturation="0.9 0 0"
              controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 2 PIP/DIP pair, cable: 10 N at 56-103 mm -->
     <dcmotor name="act_l_f_joint2_4" joint="l_f_joint2_4" input="position"
-             nominal="24 0.6 3.49" saturation="0.6 0 0"
+             nominal="24 0.6 18.14" saturation="0.6 0 0"
              controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 3 MCP flexion, cable: 10 N at 94 mm -->
     <dcmotor name="act_l_f_joint3_2" joint="l_f_joint3_2" input="position"
-             nominal="24 0.9 3.49" saturation="0.9 0 0"
+             nominal="24 0.9 7.06" saturation="0.9 0 0"
              controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 3 PIP/DIP pair, cable: 10 N at 56-103 mm -->
     <dcmotor name="act_l_f_joint3_4" joint="l_f_joint3_4" input="position"
-             nominal="24 0.6 3.49" saturation="0.6 0 0"
+             nominal="24 0.6 18.14" saturation="0.6 0 0"
              controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 4 MCP flexion, cable: 10 N at 94 mm -->
     <dcmotor name="act_l_f_joint4_2" joint="l_f_joint4_2" input="position"
-             nominal="24 0.9 3.49" saturation="0.9 0 0"
+             nominal="24 0.9 7.06" saturation="0.9 0 0"
              controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 4 PIP/DIP pair, cable: 10 N at 56-103 mm -->
     <dcmotor name="act_l_f_joint4_4" joint="l_f_joint4_4" input="position"
-             nominal="24 0.6 3.49" saturation="0.6 0 0"
+             nominal="24 0.6 18.14" saturation="0.6 0 0"
              controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 5 MCP flexion, cable: 10 N at 94 mm -->
     <dcmotor name="act_l_f_joint5_2" joint="l_f_joint5_2" input="position"
-             nominal="24 0.9 3.49" saturation="0.9 0 0"
+             nominal="24 0.9 7.06" saturation="0.9 0 0"
              controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 5 PIP/DIP pair, cable: 10 N at 56-103 mm -->
     <dcmotor name="act_l_f_joint5_4" joint="l_f_joint5_4" input="position"
-             nominal="24 0.6 3.49" saturation="0.6 0 0"
+             nominal="24 0.6 18.14" saturation="0.6 0 0"
              controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
     <!-- thumb CMR, worm direct drive (unconfirmed) -->
     <dcmotor name="act_l_f_joint1_1" joint="l_f_joint1_1" input="position"
-             nominal="24 1.2 3.49" saturation="1.2 0 0"
+             nominal="24 1.2 8.98" saturation="1.2 0 0"
              controller="60 0 2 0 0 24" ctrlrange="0 2.2" />
     <!-- four-finger abduction, ball screw (unconfirmed) -->
     <dcmotor name="act_l_f_joint2_1" joint="l_f_joint2_1" input="position"
-             nominal="24 0.8 3.49" saturation="0.8 0 0"
+             nominal="24 0.8 3.99" saturation="0.8 0 0"
              controller="90 0 3 0 0 24" ctrlrange="0 0.316" />
   </actuator>
   <sensor>

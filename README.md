@@ -44,3 +44,8 @@ A unified robot asset repository, covering robot descriptions, geometric resourc
 ## Azure Kinect DK
 
 - kinect_dk: This package contains a simplified robot description (MJCF) of the [Azure Kinect DK](https://azure.microsoft.com/zh-cn/products/kinect-dk) camera developed by Microsoft. It is derived from the [publicly available URDF description](https://github.com/microsoft/Azure_Kinect_ROS_Driver/blob/melodic/urdf/azure_kinect.urdf.xacro).
+
+## Reorientation Objects
+
+- reorientation_cube: Cube MJCF and tag36h11 print/physical-layout assets for 50, 60, and 70 mm pine cubes.
+- reorientation_cylinder: Nominal 60 mm diameter by 80 mm wooden-cylinder MJCF and proposed top/bottom tag36h11 assets.

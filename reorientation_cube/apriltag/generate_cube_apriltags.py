@@ -35,13 +35,45 @@ CUBES = (
     CubeSpec("cube_70mm", 70.0),
 )
 
+# Face -> (key, PDF label, tag id, how to orient the printed label).
+#
+# **LEFT and RIGHT here are the cube's own, not the viewer's.**  With the frame
+# +X right, +Y front, +Z top, the RIGHT face (+X) is the one on your LEFT while
+# you look at the FRONT face, the same way a person facing you has their right
+# hand on your left.  The labels say so on the printed sheet because getting this
+# backwards is not hypothetical: it is what happened here.
+#
+# Updated 2026-09-04 to the layout actually attached to the physical pine cubes,
+# previously recorded separately in `physical_cube_tag_layout.yaml`.  The original
+# print plan put ID 0 on the front and ID 4 on top; the operator stuck them with
+# ID 0 on top and ID 1 on the front, and the physical cube is the thing trackers
+# have to agree with.  Keeping two mappings alive cost a 90 degree error waiting
+# to happen -- a translation-only pipeline never notices it, an orientation
+# pipeline is wrecked by it -- so the generator now emits the physical layout and
+# there is one mapping instead of two.
+#
+# Corrected again 2026-09-05: IDs 2 and 4 were the wrong way round.  The record's
+# unfolding, drawn facing the FRONT face, puts ID 2 to the viewer's right, and the
+# viewer's right is -X = the LEFT face -- so ID 2 is on LEFT (-X) and ID 4 on
+# RIGHT (+X).  The `recorded_edge_adjacencies` in `physical_cube_tag_layout.yaml`
+# had said the same thing all along (read as each tag image's own left/right they
+# give the cycle 1->2->3->4 along image-right, where the old table gave
+# 1->4->3->2), but they were set aside as ambiguous and nothing acted on them.
+# What forced it was the tracker: with two faces of the real cube in view at once,
+# IDs 3 and 4 both decoded on 696/696 frames and their pose votes differed by
+# 179.2 deg, sd 0.02, about the cube z axis -- exactly a swap of two opposite side
+# faces.  Re-audited after the swap: every observed pair agrees within 1.3 deg
+# (`armhand-mjlab/scripts/deploy/faceaudit.py`, 2695 frames).
+#
+# The in-plane orientations were already identical between the two plans for every
+# face position; only the id-to-face assignment moved.
 FACES = (
-    ("front", "FRONT", 0, "top edge toward TOP face"),
-    ("right", "RIGHT", 1, "top edge toward TOP face"),
-    ("back", "BACK", 2, "top edge toward TOP face"),
-    ("left", "LEFT", 3, "top edge toward TOP face"),
-    ("top", "TOP", 4, "top edge toward BACK face"),
-    ("bottom", "BOTTOM", 5, "top edge toward FRONT face"),
+    ("top", "TOP +Z", 0, "top edge toward BACK face"),
+    ("front", "FRONT +Y", 1, "top edge toward TOP face"),
+    ("right", "RIGHT +X", 4, "top edge toward TOP face"),
+    ("back", "BACK -Y", 3, "top edge toward TOP face"),
+    ("left", "LEFT -X", 2, "top edge toward TOP face"),
+    ("bottom", "BOTTOM -Z", 5, "top edge toward FRONT face"),
 )
 
 
@@ -186,6 +218,12 @@ def draw_page_header(pdf: canvas.Canvas, spec: CubeSpec) -> None:
         page_h - mm(17.0),
         "Print at 100% / Actual size. Cut on the tag's white square boundary; crop marks stay on scrap.",
     )
+    pdf.drawCentredString(
+        page_w / 2.0,
+        page_h - mm(21.0),
+        "Face names are the CUBE's own axes: RIGHT +X is the face on YOUR LEFT "
+        "while you look at FRONT +Y.",
+    )
 
 
 def write_print_pdf(
@@ -218,6 +256,8 @@ def write_mapping(path: Path) -> None:
         "print_scale: 1.0",
         "size_definition: detection corners at the 8x8 black-square boundary",
         "ids_reused_across_cube_sizes: true",
+        "layout_authority: physical attachment on the pine cubes; matches "
+        "physical_cube_tag_layout.yaml",
         "simultaneous_multi_size_identification_by_id: false",
         "cubes:",
     ]

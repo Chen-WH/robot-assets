@@ -3,6 +3,9 @@ layout: AprilTag 3 official 10x10 image
 print_scale: 1.0
 size_definition: detection corners at the 8x8 black-square boundary
 ids_reused_across_cube_sizes: true
+layout_authority: physical attachment on the pine cubes; matches physical_cube_tag_layout.yaml
+face_name_frame: cube axes, not the viewer's -- right is +X, which faces you on your LEFT when you look at front (+Y)
+corrected: 2026-09-05, ids 2 and 4 exchanged; see physical_cube_tag_layout.yaml corrections
 simultaneous_multi_size_identification_by_id: false
 cubes:
   cube_50mm:
@@ -10,21 +13,21 @@ cubes:
     full_label_size_m: 0.05
     detector_tag_size_m: 0.04
     faces:
-      front:
+      top:
         id: 0
-        orientation: top edge toward TOP face
-      right:
+        orientation: top edge toward BACK face
+      front:
         id: 1
         orientation: top edge toward TOP face
-      back:
-        id: 2
+      right:
+        id: 4
         orientation: top edge toward TOP face
-      left:
+      back:
         id: 3
         orientation: top edge toward TOP face
-      top:
-        id: 4
-        orientation: top edge toward BACK face
+      left:
+        id: 2
+        orientation: top edge toward TOP face
       bottom:
         id: 5
         orientation: top edge toward FRONT face
@@ -33,21 +36,21 @@ cubes:
     full_label_size_m: 0.06
     detector_tag_size_m: 0.048
     faces:
-      front:
+      top:
         id: 0
-        orientation: top edge toward TOP face
-      right:
+        orientation: top edge toward BACK face
+      front:
         id: 1
         orientation: top edge toward TOP face
-      back:
-        id: 2
+      right:
+        id: 4
         orientation: top edge toward TOP face
-      left:
+      back:
         id: 3
         orientation: top edge toward TOP face
-      top:
-        id: 4
-        orientation: top edge toward BACK face
+      left:
+        id: 2
+        orientation: top edge toward TOP face
       bottom:
         id: 5
         orientation: top edge toward FRONT face
@@ -56,21 +59,21 @@ cubes:
     full_label_size_m: 0.07
     detector_tag_size_m: 0.056
     faces:
-      front:
+      top:
         id: 0
-        orientation: top edge toward TOP face
-      right:
+        orientation: top edge toward BACK face
+      front:
         id: 1
         orientation: top edge toward TOP face
-      back:
-        id: 2
+      right:
+        id: 4
         orientation: top edge toward TOP face
-      left:
+      back:
         id: 3
         orientation: top edge toward TOP face
-      top:
-        id: 4
-        orientation: top edge toward BACK face
+      left:
+        id: 2
+        orientation: top edge toward TOP face
       bottom:
         id: 5
         orientation: top edge toward FRONT face

@@ -1,0 +1,123 @@
+schema_version: "1.0"
+record_id: dexhand_pine_cubes_tag36h11_physical_face_layout_20260903
+record_type: user_reported_physical_attachment
+recorded_date: 2026-09-03
+family: tag36h11
+applies_to_specimens:
+  - cube_50mm
+  - cube_60mm
+  - cube_70mm
+object_frame:
+  origin: cube center
+  axes: "+X right, +Y front, +Z top"
+  # "right" is the CUBE's right, not the viewer's. Facing the front face you are
+  # looking along -Y, so +X (the RIGHT face) is on your LEFT and -X (the LEFT
+  # face) is on your right. Every unfolding drawn "facing the front" is therefore
+  # mirrored with respect to these names. Reading that backwards is what put ids
+  # 2 and 4 on the wrong faces in this file until 2026-09-05.
+  handedness_note: "an unfolding drawn facing +Y shows +X on the viewer's left"
+face_id_status: measured_2026_09_05
+in_plane_tag_orientation_status: recorded_from_upright_and_edge_adjacencies
+metric_T_cube_tag_status: pending_measurement
+side_tag_orientation:
+  tag_ids: [1, 2, 3, 4]
+  orientation: upright
+  definition: each tag top edge points toward the cube TOP face
+# Each `first_edge`/`second_edge` is that TAG IMAGE's own edge, not a cube-named
+# side. These six were the only part of this record that was right about ids 2
+# and 4 the whole time -- along image-right they give the cycle 1 -> 2 -> 3 -> 4,
+# where the pre-2026-09-05 `faces` block below gave 1 -> 4 -> 3 -> 2 -- but they
+# were treated as too ambiguous to act on and the `faces` block won. They are
+# ambiguous only about which side of the cube one was standing on; the cycle
+# ORDER they impose is not.
+recorded_edge_adjacencies:
+  - first_tag_id: 0
+    first_edge: bottom
+    second_tag_id: 1
+    second_edge: top
+    physical_relation: joined_across_top_front_cube_edge
+  - first_tag_id: 5
+    first_edge: top
+    second_tag_id: 1
+    second_edge: bottom
+    physical_relation: joined_across_bottom_front_cube_edge
+  - first_tag_id: 1
+    first_edge: left
+    second_tag_id: 4
+    second_edge: right
+    physical_relation: joined_across_front_left_cube_edge
+  - first_tag_id: 1
+    first_edge: right
+    second_tag_id: 2
+    second_edge: left
+    physical_relation: joined_across_front_right_cube_edge
+  - first_tag_id: 2
+    first_edge: right
+    second_tag_id: 3
+    second_edge: left
+    physical_relation: joined_across_right_back_cube_edge
+  - first_tag_id: 3
+    first_edge: right
+    second_tag_id: 4
+    second_edge: left
+    physical_relation: joined_across_back_left_cube_edge
+faces:
+  top:
+    normal_in_cube_frame: [0, 0, 1]
+    id: 0
+  front:
+    normal_in_cube_frame: [0, 1, 0]
+    id: 1
+  right:
+    normal_in_cube_frame: [1, 0, 0]
+    id: 4          # was 2 until 2026-09-05; see corrections
+  back:
+    normal_in_cube_frame: [0, -1, 0]
+    id: 3
+  left:
+    normal_in_cube_frame: [-1, 0, 0]
+    id: 2          # was 4 until 2026-09-05; see corrections
+  bottom:
+    normal_in_cube_frame: [0, 0, -1]
+    id: 5
+
+corrections:
+  - date: 2026-09-05
+    changed: ids 2 and 4 exchanged between the right (+X) and left (-X) faces
+    superseded: {right: 2, left: 4}
+    cause: >-
+      The operator's unfolding is drawn facing the front face, where the cube's
+      +X is on the viewer's LEFT. Reading the drawing's right-hand neighbour of
+      ID 1 as the +X face put ids 2 and 4 on each other's faces. Everything else
+      in this record, including all six edge adjacencies, was correct.
+    evidence:
+      - >-
+        Tracker, real cube in the closed grasp: ids 3 and 4 decoded on 696/696
+        frames with margins 60 and 87, and their pose votes disagreed by
+        179.2 deg, sd 0.02, about the cube z axis -- the signature of two
+        opposite side faces exchanged. A 180 deg about z cannot distinguish
+        {1,3} from {2,4} on its own; the unfolding is what selected {2,4}.
+      - >-
+        This record's own recorded_edge_adjacencies, read as each tag image's
+        own left/right, give the side cycle 1 -> 2 -> 3 -> 4 along image-right.
+        The superseded faces block gave 1 -> 4 -> 3 -> 2.
+      - >-
+        Re-audited after the change over 2695 frames: every pair of faces seen
+        together agrees within 1.3 deg, the 3-4 pair at 1.09 deg over 1134
+        frames (armhand-mjlab/scripts/deploy/faceaudit.py).
+    coverage: >-
+      Closed over two audit runs, 2695 frames each: 11 of the 12 observable face
+      pairs scored, all between 0.63 and 1.52 deg. The three unscored pairs
+      0-5, 1-3 and 2-4 are opposite faces, which no camera can see at once. The
+      one observable pair never seen, 0-3, adds nothing: face 0 was scored
+      against 1, 2 and 4 and face 3 against 2, 4 and 5, and the 11 edges connect
+      all six faces. Pairwise agreement over a connected graph leaves exactly one
+      thing unmeasurable -- a rotation common to all six faces -- and such a
+      rotation maps faces onto faces, so it is an element of the cube's own
+      symmetry group: unobservable on a symmetric cube and without meaning for a
+      task whose goals are orientations of it.
+notes:
+  - Face IDs are the physical attachment reported by the operator and override the generated print-plan mapping for tracking.
+  - All six face IDs and in-plane orientations are recorded from the operator-reported upright and edge-adjacency constraints.
+  - Five of the six face IDs are now measured against the physical cube rather than recorded; see corrections. ID 1 is not.
+  - Measure the printed black-square boundary and metric face offsets on the actual specimen before deriving full T_cube_tag transforms.

@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  DexHand 021 left + wrist-mounted RealSense D435i, with no arm.
+
+  For the in-hand manipulation experiments the UR10 holds a single pose for the
+  whole episode, so carrying its six joints only adds degrees of freedom that
+  nothing drives.  This scene welds the hand to the world instead and keeps the
+  bracket geometry that actually matters: the camera's pose relative to the hand.
+
+  The mounting matches `ur10_dexhand_inhand.xml`, which is the as-built rig for
+  the in-hand tasks.  `ur10_dexhand_grasp.xml` is the same file with the hand
+  turned 180 deg about its own z for grasping work; the two differ in exactly one
+  line, `left_hand_base`'s quaternion, and that one line moves the camera from in
+  front of the palm to behind the knuckles.  The `d435i` body pose below is the
+  in-hand one.
+
+  `armhand-mjlab/scripts/deploy/extrinsic.py` derives the same transform by
+  reading `ur10_dexhand_inhand.xml`, cross-checks it against the grasp file plus a
+  180 deg yaw (agrees to 0.000 deg / 0.000 mm), and prints the comparison with the
+  WP7 measured extrinsic (2.58 deg / 8.5 mm apart; that calibration did not pass
+  its own gates and is not promoted).  At the nominal grasp this puts the cube
+  194 mm from the camera and 10.2 deg off the optical axis, against 279 mm and
+  25.7 deg for the grasp mounting.
+
+  Cameras.  `d435i_color` and `d435i_depth` follow the MuJoCo convention: the
+  camera looks down its own -z with +y up.  The OpenCV / librealsense optical
+  frame that AprilTag detection and the hand-eye calibration both use is +z
+  forward, +y down, so a detector pose has to be flipped by diag(1, -1, -1)
+  before it is composed with anything from this file.  `deploy/extrinsic.py`
+  applies that flip once and writes the result to `config/deploy/extrinsic.json`.
+
+  `d435i_ir_left` is the stream the deployment actually runs on: global shutter
+  and 90 fps, against the colour sensor's rolling shutter, which skews a tag by
+  ~3.5 deg at the spin rates this hand reaches.  The colour sensor also tops out
+  at 60 fps on this device -- only the stereo module reaches 90 -- so IR is the
+  only way to get the frame rate at all.  Measured on serial 244222075140:
+  848x480 y8 at a delivered 90.0 fps, fx = fy = 427.6, cx 428.1, cy 238.2, and
+  14.8 mm from the colour optical frame.  The `fovy` below reproduces fx to
+  about 1 %.
+-->
+<mujoco model="dexhand021_left_d435i">
+  <include file="../../dexrobot_021/mjcf/dexhand021_left_convex_mimic.xml" />
+  <!-- Must come AFTER the <include>: the hand file carries its own
+       <compiler meshdir>, relative to itself, and whichever compiler element
+       MuJoCo reads last is the one that resolves the mesh paths. -->
+  <compiler angle="radian"
+            meshdir="../../dexrobot_021/meshes/dexhand021_simplified/" />
+
+  <statistic center="0.05 0 0.12" extent="0.5" />
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0" />
+    <rgba haze="0.15 0.25 0.35 1" />
+    <global azimuth="150" elevation="-20" offwidth="1920" offheight="1080" />
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0"
+             width="512" height="3072" />
+    <material name="d435i_casing" rgba="0.30 0.30 0.32 1" />
+    <material name="d435i_lens" rgba="0.04 0.04 0.05 1" />
+  </asset>
+
+  <worldbody>
+    <light pos="0.3 0 0.6" dir="-0.4 0 -1" directional="true" />
+
+    <!-- Pose derived by `scripts/deploy/extrinsic.py`, CAD chain with the 180 deg
+         installation yaw applied.  quat is MuJoCo `w x y z`.  Held rigid to the
+         world exactly as the hand base is: on hardware both are bolted to the
+         same bracket and the arm does not move during an episode. -->
+    <body name="d435i" pos="0.166540 -0.030000 0.013000"
+          quat="0.683015 -0.183005 -0.183005 0.683015">
+      <geom name="d435i_body" type="box" size="0.0450 0.0125 0.0125"
+            material="d435i_casing" contype="0" conaffinity="0" group="2" mass="0" />
+      <geom name="d435i_ir_left_lens" type="cylinder" size="0.005 0.001"
+            pos="-0.0175 0 0.0125" quat="0.7071 0.7071 0 0"
+            material="d435i_lens" contype="0" conaffinity="0" group="2" mass="0" />
+      <geom name="d435i_color_lens" type="cylinder" size="0.005 0.001"
+            pos="0.0145 0 0.0125" quat="0.7071 0.7071 0 0"
+            material="d435i_lens" contype="0" conaffinity="0" group="2" mass="0" />
+
+      <!-- The camera bodies collide: the hand must not drive a finger into the
+           lens, and `sightline`-style occlusion checks need the housing to be a
+           real obstacle rather than a decal. -->
+      <geom name="d435i_collision" type="box" size="0.0450 0.0125 0.0125"
+            group="1" mass="0.072" />
+
+      <!-- MuJoCo cameras: -z forward, +y up.  The body frame above is the
+           librealsense *color optical* frame, so each camera carries the
+           diag(1,-1,-1) flip as a 180 deg roll about its own x. -->
+      <camera name="d435i_color" pos="0 0 0" quat="0 1 0 0"
+              fovy="42.5" resolution="1920 1080" />
+      <camera name="d435i_depth" pos="-0.0145 0 0" quat="0 1 0 0"
+              fovy="58.0" resolution="1280 720" />
+      <!-- Left IR imager: 55 mm to the -x side of colour on the D435i, sharing
+           the depth module's field of view.  848x480 at 90 fps is the mode the
+           control loop is sized against. -->
+      <camera name="d435i_ir_left" pos="-0.0325 0 0" quat="0 1 0 0"
+              fovy="58.0" resolution="848 480" />
+      <site name="d435i_color_optical" size="0.004" rgba="1 0 1 0.6" />
+    </body>
+
+    <!-- The printed bracket between the flange and the hand is deliberately NOT
+         modelled.  Its shape was never measured, and a guessed box sitting in
+         the camera's field of view would corrupt exactly the occlusion number
+         this scene exists to produce.  If it is ever measured, add it here and
+         re-run `scripts/deploy/preview.py`; until then the reported occlusion is
+         a lower bound that counts only the hand itself. -->
+  </worldbody>
+
+  <keyframe>
+    <!-- Hand at its default open pose.  The cube is added by the task code, not
+         here, so this scene compiles standalone for camera and occlusion checks. -->
+    <key name="home" qpos="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" />
+  </keyframe>
+</mujoco>

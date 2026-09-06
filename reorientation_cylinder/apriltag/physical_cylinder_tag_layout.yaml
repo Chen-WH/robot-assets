@@ -1,0 +1,36 @@
+schema_version: "1.0"
+record_id: dexhand_cylinder_d60_h80_tag36h11_planned_layout_20260903
+record_type: planned_physical_attachment
+recorded_date: 2026-09-03
+family: tag36h11
+specimen: cylinder_d60_h80
+object_frame:
+  origin: cylinder geometric center
+  axes: "+X right, +Y front, +Z top along the cylinder axis"
+nominal_geometry:
+  diameter_m: 0.06
+  height_m: 0.08
+  measurement_status: nominal_pending_physical_measurement
+tag_design:
+  complete_label_size_m: 0.036
+  detector_black_square_size_m: 0.0288
+  label_corner_radial_margin_m: 0.0045441559
+  size_status: nominal_pending_post_print_measurement
+id_assignment_status: proposed_pending_attachment_confirmation
+in_plane_tag_orientation_status: pending_attachment_measurement
+metric_T_cylinder_tag_status: pending_measurement
+tags:
+  - id: 6
+    face: top
+    outward_normal_in_cylinder_frame: [0, 0, 1]
+    planned_center_in_cylinder_frame_m: [0, 0, 0.04]
+    attachment_status: planned
+  - id: 7
+    face: bottom
+    outward_normal_in_cylinder_frame: [0, 0, -1]
+    planned_center_in_cylinder_frame_m: [0, 0, -0.04]
+    attachment_status: planned
+notes:
+  - IDs 6 and 7 avoid collisions with the physical cube IDs 0 through 5.
+  - The 36 mm complete square fits inside a 60 mm circular face with about 4.54 mm radial corner margin.
+  - Do not derive full T_cylinder_tag transforms until the actual diameter, height, tag black-square size, centering, and in-plane orientation are measured.
