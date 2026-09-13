@@ -41,8 +41,29 @@
 
          rolling 0.002 remains INERT at condim="4" (it needs 6).  Left declared rather
          than removed so the value is not lost, but do not tune it expecting an effect,
-         and do not read it as a modelling claim. -->
-    <geom condim="4" solref="0.02 1" solimp="0.9 0.95 0.001" friction="1.0 0.003 0.002" />
+         and do not read it as a modelling claim.
+
+         priority 1: MuJoCo combines a contact pair's parameters by taking the
+         elementwise MAX of the two geoms' friction and the solmix-weighted MEAN of
+         their solref/solimp -- UNLESS the two priorities differ, in which case the
+         higher-priority geom's values are used outright.  Declaring the hand at 1
+         (the cube ships at 0) makes this side govern every hand-object contact.
+
+         Two things this fixes.  It retires the rule that every one of the cube's
+         friction axes has to sit below anything the hand will ever use, which was a
+         standing trap: the cube's torsional coefficient was 0.005 against the hand's
+         0.003, so the moment condim went to 4 the CUBE would have governed torsion.
+         And it makes randomising solref/solimp on the hand actually reach the
+         contact -- under mean-mixing, half of any such draw was the cube's fixed
+         default, so the effective range would have been half of the declared one.
+
+         At the nominal values this changes NOTHING: friction max(hand, cube) was
+         already the hand's on all three axes, condim max(4, 3) was already 4, and
+         the cube declares no solref/solimp so the mean of two identical defaults
+         was that default.  Verified numerically, see scripts/analysis/contactsweep.py
+         --check-priority. -->
+    <geom condim="4" solref="0.02 1" solimp="0.9 0.95 0.001" friction="1.0 0.003 0.002"
+          priority="1" />
     <default class="visual">
       <geom contype="0" conaffinity="0" group="2" density="0" />
     </default>
