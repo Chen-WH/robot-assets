@@ -281,79 +281,79 @@
     <!-- finger 1_2 flexion, cable -->
     <dcmotor name="act_l_f_joint1_2" joint="l_f_joint1_2" input="position"
              nominal="24 0.9 3.49" saturation="0.9 0 0"
-             controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
+             controller="160 0 2.66667 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 1_3: FICTIONAL motor -- the hardware drives this joint through a linkage -->
     <dcmotor name="act_l_f_joint1_3" joint="l_f_joint1_3" input="position"
              nominal="24 0.6 3.49" saturation="0.6 0 0"
-             controller="120 0 4 0 0 24" ctrlrange="0 1.39" />
+             controller="240 0 4 0 0 24" ctrlrange="0 1.39" />
     <!-- finger 1_4 flexion, cable -->
     <dcmotor name="act_l_f_joint1_4" joint="l_f_joint1_4" input="position"
              nominal="24 0.6 3.49" saturation="0.6 0 0"
-             controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
+             controller="240 0 4 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 2_2 flexion, cable -->
     <dcmotor name="act_l_f_joint2_2" joint="l_f_joint2_2" input="position"
              nominal="24 0.9 3.49" saturation="0.9 0 0"
-             controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
+             controller="160 0 2.66667 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 2_3: FICTIONAL motor -- the hardware drives this joint through a linkage -->
     <dcmotor name="act_l_f_joint2_3" joint="l_f_joint2_3" input="position"
              nominal="24 0.6 3.49" saturation="0.6 0 0"
-             controller="120 0 4 0 0 24" ctrlrange="0 1.39" />
+             controller="240 0 4 0 0 24" ctrlrange="0 1.39" />
     <!-- finger 2_4 flexion, cable -->
     <dcmotor name="act_l_f_joint2_4" joint="l_f_joint2_4" input="position"
              nominal="24 0.6 3.49" saturation="0.6 0 0"
-             controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
+             controller="240 0 4 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 3_2 flexion, cable -->
     <dcmotor name="act_l_f_joint3_2" joint="l_f_joint3_2" input="position"
              nominal="24 0.9 3.49" saturation="0.9 0 0"
-             controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
+             controller="160 0 2.66667 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 3_3: FICTIONAL motor -- the hardware drives this joint through a linkage -->
     <dcmotor name="act_l_f_joint3_3" joint="l_f_joint3_3" input="position"
              nominal="24 0.6 3.49" saturation="0.6 0 0"
-             controller="120 0 4 0 0 24" ctrlrange="0 1.39" />
+             controller="240 0 4 0 0 24" ctrlrange="0 1.39" />
     <!-- finger 3_4 flexion, cable -->
     <dcmotor name="act_l_f_joint3_4" joint="l_f_joint3_4" input="position"
              nominal="24 0.6 3.49" saturation="0.6 0 0"
-             controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
+             controller="240 0 4 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 4_2 flexion, cable -->
     <dcmotor name="act_l_f_joint4_2" joint="l_f_joint4_2" input="position"
              nominal="24 0.9 3.49" saturation="0.9 0 0"
-             controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
+             controller="160 0 2.66667 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 4_3: FICTIONAL motor -- the hardware drives this joint through a linkage -->
     <dcmotor name="act_l_f_joint4_3" joint="l_f_joint4_3" input="position"
              nominal="24 0.6 3.49" saturation="0.6 0 0"
-             controller="120 0 4 0 0 24" ctrlrange="0 1.39" />
+             controller="240 0 4 0 0 24" ctrlrange="0 1.39" />
     <!-- finger 4_4 flexion, cable -->
     <dcmotor name="act_l_f_joint4_4" joint="l_f_joint4_4" input="position"
              nominal="24 0.6 3.49" saturation="0.6 0 0"
-             controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
+             controller="240 0 4 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 5_2 flexion, cable -->
     <dcmotor name="act_l_f_joint5_2" joint="l_f_joint5_2" input="position"
              nominal="24 0.9 3.49" saturation="0.9 0 0"
-             controller="80 0 2.66667 0 0 24" ctrlrange="0 1.3" />
+             controller="160 0 2.66667 0 0 24" ctrlrange="0 1.3" />
     <!-- finger 5_3: FICTIONAL motor -- the hardware drives this joint through a linkage -->
     <dcmotor name="act_l_f_joint5_3" joint="l_f_joint5_3" input="position"
              nominal="24 0.6 3.49" saturation="0.6 0 0"
-             controller="120 0 4 0 0 24" ctrlrange="0 1.39" />
+             controller="240 0 4 0 0 24" ctrlrange="0 1.39" />
     <!-- finger 5_4 flexion, cable -->
     <dcmotor name="act_l_f_joint5_4" joint="l_f_joint5_4" input="position"
              nominal="24 0.6 3.49" saturation="0.6 0 0"
-             controller="120 0 4 0 0 24" ctrlrange="0 1.3" />
+             controller="240 0 4 0 0 24" ctrlrange="0 1.3" />
     <!-- thumb CMR, worm direct drive (unconfirmed) -->
     <dcmotor name="act_l_f_joint1_1" joint="l_f_joint1_1" input="position"
              nominal="24 1.2 3.49" saturation="1.2 0 0"
-             controller="60 0 2 0 0 24" ctrlrange="0 2.2" />
+             controller="120 0 2 0 0 24" ctrlrange="0 2.2" />
     <!-- 2_1 abduction, independent here; one motor drives all three on the hardware -->
     <dcmotor name="act_l_f_joint2_1" joint="l_f_joint2_1" input="position"
              nominal="24 0.8 3.49" saturation="0.8 0 0"
-             controller="90 0 3 0 0 24" ctrlrange="0 0.6" />
+             controller="180 0 3 0 0 24" ctrlrange="0 0.6" />
     <!-- 4_1 abduction, independent here; one motor drives all three on the hardware -->
     <dcmotor name="act_l_f_joint4_1" joint="l_f_joint4_1" input="position"
              nominal="24 0.8 3.49" saturation="0.8 0 0"
-             controller="90 0 3 0 0 24" ctrlrange="0 0.6" />
+             controller="180 0 3 0 0 24" ctrlrange="0 0.6" />
     <!-- 5_1 abduction, independent here; one motor drives all three on the hardware -->
     <dcmotor name="act_l_f_joint5_1" joint="l_f_joint5_1" input="position"
              nominal="24 0.8 3.49" saturation="0.8 0 0"
-             controller="90 0 3 0 0 24" ctrlrange="0 0.6" />
+             controller="180 0 3 0 0 24" ctrlrange="0 0.6" />
   </actuator>
   <sensor>
     <contact name="contact_l_f_link1_pad_force" site="site_l_f_link1_pad" data="force" reduce="netforce" />
